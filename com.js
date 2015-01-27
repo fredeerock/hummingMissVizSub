@@ -20,6 +20,26 @@ app.use(logger('dev'));
 
 io.on('connection', function(socket) {
 
+    socket.on('userConnect', function(data) {
+        socket.emit('graphTempData', temp);
+        socket.emit('graphHeightData', height);
+        socket.emit('graphNitData', nit);
+        socket.emit('graphCondData', cond);
+        socket.emit('graphPhvalData', phval);
+        socket.emit('graphDisData', dis);
+        socket.emit('graphTurbData', turb);
+
+        getTemp();
+        getHeight();
+        getTurb();
+        getCond();
+        getNit();
+        getDis();
+        getPhval();
+
+
+    });
+
     setInterval(function() {
         socket.emit('graphTempData', temp);
         socket.emit('graphHeightData', height);
@@ -45,16 +65,28 @@ io.on('connection', function(socket) {
         // console.log(dis);
         // console.log(turb);
 
-    }, 5000);
+    }, 50000);
 
     socket.on('userClick', function(data) {
         console.log(data);
 
-
         client.hset(data.prop, data.lat, data.val, redis.print);
 
+        getTemp();
+        getHeight();
+        getTurb();
+        getCond();
+        getNit();
+        getDis();
+        getPhval();
 
-
+        socket.broadcast.emit('graphTempData', temp);
+        socket.broadcast.emit('graphHeightData', height);
+        socket.broadcast.emit('graphNitData', nit);
+        socket.broadcast.emit('graphCondData', cond);
+        socket.broadcast.emit('graphPhvalData', phval);
+        socket.broadcast.emit('graphDisData', dis);
+        socket.broadcast.emit('graphTurbData', turb);
 
 
     });

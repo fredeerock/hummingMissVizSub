@@ -8,7 +8,7 @@ client.on("error", function(err) {
 function wait60sec() {
     setTimeout(function() {
         makeRequest(wait60sec);
-    }, 10000);
+    }, 60000);
 }
 
 makeRequest(wait60sec);

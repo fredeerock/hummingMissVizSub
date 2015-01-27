@@ -64,6 +64,7 @@
     var graphs = [];
 
     var socket = io.connect('http://localhost:3000');
+    socket.emit('userConnect', "hi"); 
 
     socket.on('graphTempData', function(data) {
         console.log(data);
@@ -244,7 +245,7 @@
                 circle
                     .enter()
                     .append("circle")
-                    .attr("r", 1e-6)
+                    .attr("r", circRadius)
                     .on("mousedown", function(d) {
                         selected = dragged = d;
                         // console.log(points);
@@ -253,11 +254,7 @@
         
 
                         redraw();
-                    })
-                    .transition()
-                    .duration(750)
-                    .ease("elastic")
-                    .attr("r", circRadius);
+                    });
 
 
                 circle
