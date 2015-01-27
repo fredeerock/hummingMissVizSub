@@ -63,7 +63,7 @@
     var graphData;
     var graphs = [];
 
-    var socket = io.connect('http://localhost:3000');
+    var socket = io.connect(window.location.hostname);
     socket.emit('userConnect', "hi"); 
 
     socket.on('graphTempData', function(data) {
