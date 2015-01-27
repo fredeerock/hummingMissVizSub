@@ -1,3 +1,5 @@
+var usgsdata = require("./data.js");
+
 var express = require('express');
 var app = express();
 
