@@ -64,7 +64,8 @@
     var graphs = [];
 
     var host = location.origin;
-    var socket = io.connect(host, {port: PORT, transports: ["websocket"]});
+    var socket = io.connect(host);
+    
     socket.emit('userConnect', "hi"); 
 
     socket.on('graphTempData', function(data) {
