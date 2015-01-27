@@ -1,4 +1,4 @@
-var usgsdata = require("./data.js");
+
 
 var express = require('express');
 var app = express();
@@ -6,13 +6,14 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var logger = require('morgan');
+
+var redis = require('redis');
 var url = require('url');
-
 var redisURL = url.parse(process.env.REDISCLOUD_URL);
-
-var redis = require("redis"),
-    client = redis.createClient(redisURL.port, redisURL.hostname, {no_ready_check: true});
+var client = redis.createClient(redisURL.port, redisURL.hostname, {no_ready_check: true});
 client.auth(redisURL.auth.split(":")[1]);
+
+var usgsdata = require("./data.js");
 
 // client.on('error', function(err) {
 //     console.log('Error ' + err);
