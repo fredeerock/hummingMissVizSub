@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Humming Mississippi</title>
+    <script src="js/d3.js"></script>
+
+
+
+    <style>
+    /* set the CSS */
+    
+    body {
+        margin: 0;
+        padding: 0;
+        font: 13px sans-serif;
+        pointer-events: none;
+        position: relative;
+        width: 960px;
+        height: 500px;
+        background-color: #424254;
+    }
+    /*  rect {
+        fill: none;
+        pointer-events: all;
+        display: none;
+    }*/
+    
+    .line {
+        fill: none;
+        stroke: #64908A;
+        stroke-width: 3px;
+    }
+    circle {
+        fill: #E8CAA4;
+        fill-opacity: 0.75;
+        cursor: move;
+        /*        stroke: #351330;
+        stroke-width: 1px;*/
+    }
+    .selected {
+        fill: #CC2A41;
+        /*stroke-width: 2px;*/
+    }
+    svg {
+        pointer-events: none;
+        position: absolute !important;
+        top: 0;
+        left: 0;
+    }
+    svg circle {
+        pointer-events: all;
+    }
+    </style>
+</head>
+
+<body>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+    // var graphData;
+    var graphData;
+    var graphs = [];
+
+    var socket = io.connect('http://localhost:3000');
+    socket.emit('userConnect', "hi"); 
+
+    socket.on('graphTempData', function(data) {
+        console.log(data);
+        graphs[0] = new Graph(data, "temp");
+        // init(0);
+    });
+
+    socket.on('graphHeightData', function(data) {
+        graphs[1] = new Graph(data, "height");
+        // init(1);
+    });
+
+    socket.on('graphNitData', function(data) {
+        graphs[2] = new Graph(data, "nit");
+        // init(2);
+    });
+
+    socket.on('graphCondData', function(data) {
+        graphs[3] = new Graph(data, "cond");
+        // init(3);
+    });
+
+    socket.on('graphPhvalData', function(data) {
+        graphs[4] = new Graph(data, "phval");
+        // init(4);
+    });
+
+    socket.on('graphDisData', function(data) {
+        graphs[5] = new Graph(data, "dis");
+        // init(5);
+    });
+
+    socket.on('graphTurbData', function(data) {
+        graphs[6] = new Graph(data, "turb");
+        // init(6);
+        init();
+    });
+
+
+    function init() {
+        for (var p = 0; p < graphs.length; p++) {
+            //     // console.log(graphs[p].display());
+            graphs[p].display();
+        }
+    }
+
+
+    function Graph(din, ident) {
+
+        this.ident = ident;
+        this.din = din;
+
+        // console.log(ident); 
+
+        // console.log(din);
+
+        var width = window.innerWidth,
+            height = window.innerHeight;
+
+        // this.display();
+
+        this.display = function() {
+
+            var pointsO = [];
+            var points = [];
+            var margin = 100;
+            var circRadius = 10;
+
+            for (var i = 0; i < Object.keys(din).length; i++) {
+                pointsO[i] = [(Object.keys(din)[i]), din[Object.keys(din)[i]]];
+            }
+
+            // console.log(pointsO);
+
+            // var xExtents = d3.extent(pointsO, function(d) { return +d[0]; }); 
+            var yExtents = d3.extent(pointsO, function(d) {
+                return +d[1];
+            }); // Notice + sign. Forces num instead of str.
+
+            var xScale = d3.scale.linear()
+                .domain([28.89, 48.5])
+                .range([0 + margin, width - margin]);
+
+            var yScale = d3.scale.linear()
+                .domain(yExtents)
+                .range([0 + margin, height - margin]);
+
+            var reverseYScale = d3.scale.linear()
+                .domain([0 + margin, height - margin])
+                .range(yExtents);
+
+            var reverseXScale = d3.scale.linear()
+                .domain([0 + margin, height - margin])
+                .range([28.89, 48.5]);
+
+            for (var n = 0; n < pointsO.length; n++) {
+                points[n] = [xScale(pointsO[n][0]), yScale(pointsO[n][1])];
+            }
+
+            // console.log(points);
+
+            var dragged = null,
+                selected = points[0];
+
+            var line = d3.svg.line().interpolate("cardinal");
+
+            d3.selection.prototype.moveToFront = function() {
+                return this.each(function() {
+                    this.parentNode.appendChild(this);
+                });
+            };
+
+            // d3.selectAll("svg:nth-of-type(7)").remove();
+            d3.selectAll("svg:nth-last-of-type(7)").remove();
+
+            var svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("id", ident)
+                .on("mouseover", function() {
+                    var sel = d3.select(this);
+                    // sel.moveToFront();
+                });
+
+            // svg.append("rect") 
+            //     .attr("width", width)
+            //     .attr("height", height)
+            //     .on("mousedown", mousedown);
+
+            svg.append("path")
+                .datum(points)
+                .attr("class", "line")
+                .style("stroke", function() {
+                    if (ident == "temp") {
+                        return ("#7c5051");
+                    }
+                    if (ident == "height") {
+                        return ("#7c7550");
+                    }
+                    if (ident == "nit") {
+                        return ("#5f7e50");
+                    }
+                    if (ident == "turb") {
+                        return ("#517e65");
+                    }
+                    if (ident == "cond") {
+                        return ("#506d7c");
+                    }
+                    if (ident == "dis") {
+                        return ("#564e7c");
+                    }
+                    if (ident == "phval") {
+                        return ("#7b4d7c");
+                    } else {
+                        return ("red");
+                    }
+                })
+                .call(redraw);
+
+
+
+            // svg.node().focus();
+
+            function redraw() {
+
+                d3.select(window)
+                    .on("mousemove", mousemove)
+                    .on("mouseup", mouseup);
+
+                svg.select("path").attr("d", line);
+
+                var circle = svg.selectAll("circle")
+                    .data(points, function(d) {
+                        // console.log(d);
+                        return d;
+                    });
+
+                circle
+                    .enter()
+                    .append("circle")
+                    .attr("r", circRadius)
+                    .on("mousedown", function(d) {
+                        selected = dragged = d;
+                        // console.log(points);
+                        // console.log(d);
+
+        
+
+                        redraw();
+                    });
+
+
+                circle
+
+                    .classed("selected", function(d) {
+                        // console.log(d);
+                        // console.log(points.indexOf(d[0]));
+                        return d === selected;
+                    })
+                    .attr("cx", function(d) {
+                        // console.log(d[0]);
+                        return d[0];
+                    })
+                    .attr("cy", function(d) {
+
+                        return d[1];
+
+                    });
+
+                // circle.exit().remove();
+
+                if (d3.event) {
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
+                }
+
+            }
+
+            // function change() {
+            //     line.interpolate(this.value);
+            //     redraw();
+            // }
+
+            function mousedown() {
+                //points.push(selected = dragged = d3.mouse(svg.node()));
+                // redraw();
+            }
+
+            function mousemove() {
+                if (!dragged) return;
+                var m = d3.mouse(svg.node());
+                // console.log(points);
+                
+                for (var i = 0; i < points.length; i++) {
+                    for (var n = 0; n < points[i].length; n++) {
+                        // console.log("["+i+"]"+"["+n+"] "+points[i][n]);
+                        // console.log(dragged[0]);
+                        if (dragged[0] == +points[i][n]) { 
+                            // var io = points[n].indexOf(dragged[0]);
+                            // 1. find pos of drag val in points. 
+                            // 2. select corresponding val in pointsO.
+                            // 3. set .lat to this val.
+                            console.log(pointsO);
+                            sendData.lat = pointsO[i][n];
+                            console.log(i+"-"+n);
+                        }
+                    }
+                }
+
+                
+                // dragged[0] = Math.max(0, Math.min(width, m[0]));
+                dragged[1] = Math.max(0, Math.min(height, m[1]));
+                sendData.val = reverseYScale(dragged[1]);
+                sendEvent();
+
+                redraw();
+            }
+
+            function mouseup() {
+                if (!dragged) return;
+                mousemove();
+                dragged = null;
+
+            }
+
+
+            function sendEvent() {
+                sendData.prop = ident;
+                socket.emit('userClick', sendData); 
+                console.log(sendData);
+            }
+
+        };
+
+
+    }
+
+    var sendData = {
+        prop: 0,
+        lat: 0,
+        val: 0
+    };
+    </script>
+
+
+
+</body>
+
+</html>
