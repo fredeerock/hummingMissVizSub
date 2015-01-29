@@ -8,7 +8,9 @@ var logger = require('morgan');
 var redis = require('redis');
 var url = require('url');
 var redisURL = url.parse(process.env.REDISCLOUD_URL);
-var client = redis.createClient(redisURL.port, redisURL.hostname, {no_ready_check: true});
+var client = redis.createClient(redisURL.port, redisURL.hostname, {
+    no_ready_check: true
+});
 client.auth(redisURL.auth.split(":")[1]);
 
 var usgsdata = require("./data.js");
@@ -19,6 +21,13 @@ var usgsdata = require("./data.js");
 
 // client.on('connect', runSample);
 
+getTemp();
+getHeight();
+getTurb();
+getCond();
+getNit();
+getDis();
+getPhval();
 
 
 server.listen(process.env.PORT || 3000);
@@ -29,13 +38,6 @@ app.use(logger('dev'));
 io.on('connection', function(socket) {
 
     socket.on('userConnect', function(data) {
-        socket.emit('graphTempData', temp);
-        socket.emit('graphHeightData', height);
-        socket.emit('graphNitData', nit);
-        socket.emit('graphCondData', cond);
-        socket.emit('graphPhvalData', phval);
-        socket.emit('graphDisData', dis);
-        socket.emit('graphTurbData', turb);
 
         getTemp();
         getHeight();
@@ -44,18 +46,21 @@ io.on('connection', function(socket) {
         getNit();
         getDis();
         getPhval();
+
+        socket.emit('graphTempData', temp);
+        socket.emit('graphHeightData', height);
+        socket.emit('graphNitData', nit);
+        socket.emit('graphCondData', cond);
+        socket.emit('graphPhvalData', phval);
+        socket.emit('graphDisData', dis);
+        socket.emit('graphTurbData', turb);
+
+
 
 
     });
 
     setInterval(function() {
-        socket.emit('graphTempData', temp);
-        socket.emit('graphHeightData', height);
-        socket.emit('graphNitData', nit);
-        socket.emit('graphCondData', cond);
-        socket.emit('graphPhvalData', phval);
-        socket.emit('graphDisData', dis);
-        socket.emit('graphTurbData', turb);
 
         getTemp();
         getHeight();
@@ -64,6 +69,16 @@ io.on('connection', function(socket) {
         getNit();
         getDis();
         getPhval();
+
+        socket.emit('graphTempData', temp);
+        socket.emit('graphHeightData', height);
+        socket.emit('graphNitData', nit);
+        socket.emit('graphCondData', cond);
+        socket.emit('graphPhvalData', phval);
+        socket.emit('graphDisData', dis);
+        socket.emit('graphTurbData', turb);
+
+
 
         // console.log(temp);
         // console.log(height);
