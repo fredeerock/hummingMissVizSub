@@ -9,24 +9,29 @@ var logger = require('morgan');
 var redis = require('redis');
 var url = require('url');
 
-var redisUrl;
-var client;
 
 redisConnect();
-
+var client;
 function redisConnect() {
-	if (typeof(process.env.REDISCLOUD_URL) != 'undefined') {
-		
-		client = redis.createClient(redisURL.port, redisURL.hostname, {
-		    no_ready_check: true
-		});
 
-		client.auth(redisURL.auth.split(":")[1]);
+    if (typeof(process.env.REDISCLOUD_URL) != 'undefined') {
 
-	}
-	else { 
-		client = redis.createClient();
-	}
+        var redisURL = url.parse(process.env.REDISCLOUD_URL);
+        client = redis.createClient(redisURL.port, redisURL.hostname, {
+            no_ready_check: true
+        });
+
+        client.auth(redisURL.auth.split(":")[1]);
+        client.on("error", function(err) {
+            console.log("Error " + err);
+        });
+
+    } else {
+        client = redis.createClient();
+        client.on("error", function(err) {
+            console.log("Error " + err);
+        });
+    }
 }
 
 var usgsdata = require("./data.js");

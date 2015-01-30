@@ -10,26 +10,30 @@ var url = require('url');
 // client.auth(redisURL.auth.split(":")[1]);
 
 redisConnect();
-
+var client;
 function redisConnect() {
+
     if (typeof(process.env.REDISCLOUD_URL) != 'undefined') {
-        
+
+        var redisURL = url.parse(process.env.REDISCLOUD_URL);
         client = redis.createClient(redisURL.port, redisURL.hostname, {
             no_ready_check: true
         });
 
         client.auth(redisURL.auth.split(":")[1]);
+        client.on("error", function(err) {
+            console.log("Error " + err);
+        });
 
-    }
-    else { 
+    } else {
         client = redis.createClient();
-        // redisUrl = url.parse(redisUrlDefault);
+        client.on("error", function(err) {
+            console.log("Error " + err);
+        });
     }
 }
 
-client.on("error", function(err) {
-    console.log("Error " + err);
-});
+
 
 function wait60sec() {
     setTimeout(function() {
@@ -112,7 +116,7 @@ function makeRequest(callback) {
 
 
 
-// client.quit();
+    // client.quit();
     callback();
 
 }
