@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var favicon = require('serve-favicon');
 
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
@@ -7,14 +8,56 @@ var logger = require('morgan');
 
 var redis = require('redis');
 var url = require('url');
-var redisURL = url.parse(process.env.REDISCLOUD_URL);
-var client = redis.createClient(redisURL.port, redisURL.hostname, {
-    no_ready_check: true
-});
-client.auth(redisURL.auth.split(":")[1]);
+
+// var redisURL = url.parse(process.env.REDISCLOUD_URL);
+// var client = redis.createClient(redisURL.port, redisURL.hostname, {
+//     no_ready_check: true
+// });
+// client.auth(redisURL.auth.split(":")[1]);
+
+
+
+
+
+
+
+
+
+var redisUrl;
+var client;
+// var redisUrlDefault = 'redis://:@127.0.0.1:6379/0';
+
+redisConnect();
+
+function redisConnect() {
+	if (typeof(process.env.REDISCLOUD_URL) != 'undefined') {
+		
+		client = redis.createClient(redisURL.port, redisURL.hostname, {
+		    no_ready_check: true
+		});
+
+		client.auth(redisURL.auth.split(":")[1]);
+
+	}
+	else { 
+		client = redis.createClient();
+		// redisUrl = url.parse(redisUrlDefault);
+	}
+}
+
+
+
+
+
+
+
+
+
+
 
 var usgsdata = require("./data.js");
-app.use(express.favicon(__dirname + '/public/favicon.ico'));
+
+app.use(favicon(__dirname + '/public/favicon.ico'));
 
 // client.on('error', function(err) {
 //     console.log('Error ' + err);
