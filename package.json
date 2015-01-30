@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.11.0",
+    "express-livereload": "0.0.24",
     "morgan": "~1.5.1",
     "redis": "^0.12.1",
     "request": "^2.51.0",
