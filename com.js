@@ -14,6 +14,7 @@ var client = redis.createClient(redisURL.port, redisURL.hostname, {
 client.auth(redisURL.auth.split(":")[1]);
 
 var usgsdata = require("./data.js");
+app.use(express.favicon(__dirname + '/public/favicon.ico'));
 
 // client.on('error', function(err) {
 //     console.log('Error ' + err);
